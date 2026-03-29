@@ -10,7 +10,7 @@ const events = [
     date: "Fête de l'Aïd",
     title: "Cadeaux de l'Aïd",
     desc: "Distribution de cadeaux devant un Hôtel Social par les membres du bureau pour apporter de la joie aux familles.",
-    image: "aid.jpeg",
+    image: "aid.jpg",
     icon: "🎁",
     color: "text-[#00ACC1]",
     bg: "bg-cyan-50"
@@ -40,7 +40,7 @@ const events = [
     date: "Fin du Ramadan",
     title: "Zakat & Douceurs",
     desc: "Distribution de Zakat et de cadeaux (Tassabih, Musk, bonbons en sachets tissu) offerts par de généreuses sœurs de Lyon et Montereau.",
-    image: "fin.jpeg",
+    image: "fin.jpg",
     icon: "🌙",
     color: "text-[#0288D1]",
     bg: "bg-sky-50"

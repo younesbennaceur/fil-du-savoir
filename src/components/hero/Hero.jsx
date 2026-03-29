@@ -236,7 +236,7 @@ export default function FilDuSavoirPremiumHero() {
           <div className="hero-card relative w-full lg:w-72 bg-[#0D47A1] rounded-[2.5rem] p-3 flex flex-col shadow-[0_20px_40px_-15px_rgba(13,71,161,0.4)] group overflow-hidden">
             <div className="relative h-56 w-full rounded-[2rem] overflow-hidden">
               <div className="absolute inset-0 bg-[#0D47A1]/20 z-10 transition-opacity group-hover:opacity-0" />
-              <img src="/team.jpeg" alt="Enfants apprenant" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              <img src="/team.jpg" alt="Enfants apprenant" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
             </div>
             <div className="absolute top-[13.5rem] left-1/2 -translate-x-1/2 w-max z-20">
               <button className="bg-[#C4F970] text-[#0D47A1] px-6 py-2.5 rounded-full font-bold text-sm shadow-lg hover:bg-white hover:scale-105 transition-all">
@@ -256,7 +256,7 @@ export default function FilDuSavoirPremiumHero() {
           <div className="hero-card relative w-full lg:w-72 bg-[#1565C0] rounded-[2.5rem] p-3 flex flex-col shadow-[0_20px_40px_-15px_rgba(21,101,192,0.3)] group overflow-hidden">
             <div className="relative h-40 w-full rounded-[2rem] overflow-hidden">
                <div className="absolute inset-0 bg-[#1565C0]/20 z-10 transition-opacity group-hover:opacity-0" />
-              <img src="/gift.jpeg" alt="Matériel créatif" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              <img src="/learning.jpg" alt="Matériel créatif" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
             </div>
             <ZigzagWave className="absolute top-44 left-0 w-full opacity-60" />
             <div className="mt-8 px-4 z-10 flex-1 flex flex-col pt-2">

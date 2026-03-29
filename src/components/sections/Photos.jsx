@@ -32,13 +32,20 @@ const galleryItems = [
     title: "Iftar",
     category: "Ramadan",
     media: "iftar2.jpeg",
-    gridClass: "md:col-span-1 md:row-span-2", // Carte haute (portrait)
+    gridClass: "md:col-span-1 md:row-span-1", // Carte haute (portrait)
+  },
+   {
+    id: 10,
+    title: "cadeaux de l'Aïd",
+    category: "Solidarité",
+    media: "gift.jpeg",
+    gridClass: "md:col-span-1 md:row-span-1", // Longue carte finale
   },
   {
     id: 5,
     title: "Fête de l'Aïd",
     category: "Événement",
-    media: "aid.jpeg",
+    media: "aid.jpg",
     gridClass: "md:col-span-2 md:row-span-1", // Carte large (paysage)
   },
   {
@@ -48,13 +55,7 @@ const galleryItems = [
     media: "gift.mp4",
     gridClass: "md:col-span-1 md:row-span-1", 
   },
-  {
-    id: 7,
-    title: "Association",
-    category: "Vie Asso",
-    media: "asso.mp4",
-    gridClass: "md:col-span-2 md:row-span-1", 
-  },
+
   {
     id: 8,
     title: "Iftar Solidaire",
@@ -62,19 +63,13 @@ const galleryItems = [
     media: "iftar.mp4", 
     gridClass: "md:col-span-1 md:row-span-1", 
   },
-  {
-    id: 9,
-    title: "activité ",
-    category: "Vie Asso",
-    media: "team.jpeg",
-    gridClass: "md:col-span-1 md:row-span-2", 
-  },
+
   {
     id: 10,
     title: "cadeaux de l'Aïd",
     category: "Solidarité",
     media: "gift.jpeg",
-    gridClass: "md:col-span-3 md:row-span-1", // Longue carte finale
+    gridClass: "md:col-span-4 md:row-span-", // Longue carte finale
   }
 ];
 

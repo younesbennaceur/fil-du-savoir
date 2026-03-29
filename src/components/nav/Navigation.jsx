@@ -40,17 +40,7 @@ const Navigation = () => {
         
         {/* Zone Logo */}
         <a href="#accueil" className="flex items-center gap-3 cursor-pointer group outline-none">
-          <FilDuSavoirLogo 
-            className="transition-all duration-500 ease-in-out group-hover:rotate-[360deg] w-10 h-10 md:w-12 md:h-12" 
-          />
-          <div className="flex flex-col justify-center">
-            <span className="text-[#0D47A1] font-extrabold text-base md:text-lg tracking-tight leading-none group-hover:text-[#00ACC1] transition-colors">
-              Fil du Savoir
-            </span>
-            <span className="text-[#00ACC1] font-bold text-[8px] md:text-[9px] tracking-widest uppercase mt-0.5">
-              Association
-            </span>
-          </div>
+         <img className='h-16 w-24' src="logo.png" alt="" />
         </a>
         
         {/* Liens Desktop (Scroll sur la même page) */}
