@@ -13,7 +13,7 @@ export default function Home() {
   return (
     <div className="">
      
-      
+      <Navigation />
       <main>
         <Hero />
         <AboutMissionSection />
@@ -24,6 +24,7 @@ export default function Home() {
         
       
       </main>
+      <Footer />
 
       
     </div>

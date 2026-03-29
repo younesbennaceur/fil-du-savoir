@@ -8,6 +8,7 @@ import InscriptionPage from './pages/Inscription';
 import DonationPage from './pages/Don';
 import Navigation from './components/nav/Navigation';
 import Footer from './components/sections/Footer';
+import AdminDashboard from './pages/Admin';
 
 
 
@@ -15,15 +16,19 @@ export default function App() {
   return (
     <div className="min-h-screen  ">
       
-      <Navigation />
+     
       {/* On utilise directement Routes ici ! */}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/inscription" element={<InscriptionPage />} />
         <Route path="/don" element={<DonationPage />} />
 
+        <Route path="/admin" element={<AdminDashboard />} />
+        
+
+
       </Routes>
-      <Footer />
+   
     </div>
   );
 }
