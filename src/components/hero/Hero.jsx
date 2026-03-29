@@ -184,7 +184,7 @@ export default function FilDuSavoirPremiumHero() {
       ))}
 
       {/* ── CONTENU PRINCIPAL (Hero Text) ── */}
-      <div className="relative z-30 flex flex-col items-center text-center mt-36 px-4 flex-1">
+      <div className="relative z-30 flex flex-col items-center text-center mt-16 px-4 flex-1">
         
         <div ref={textRef} className="max-w-4xl mx-auto z-40 relative pointer-events-none flex flex-col items-center">
           
@@ -207,7 +207,7 @@ export default function FilDuSavoirPremiumHero() {
             </span>
           </h1>
 
-          <p className="text-[#1565C0]/80 text-lg md:text-xl max-w-2xl mx-auto mb-12 font-medium leading-relaxed">
+          <p className="text-[#1565C0]/80 text-lg md:text-xl max-w-2xl mx-auto mb-6 font-medium leading-relaxed">
             Rejoignez <strong className="text-[#0D47A1]">Fil du Savoir</strong>. Une association dédiée à l'apprentissage, l'entraide et l'épanouissement pour tous à Lieusaint.
           </p>
 
@@ -231,7 +231,7 @@ export default function FilDuSavoirPremiumHero() {
         </div>
 
         {/* ── Section des 3 Cartes Images ── */}
-        <div className="mt-20 w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-stretch justify-center gap-6 px-4 relative z-40 pointer-events-auto">
+        <div className="mt-12 w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-stretch justify-center gap-6 px-4 relative z-40 pointer-events-auto">
           
           <div className="hero-card relative w-full lg:w-72 bg-[#0D47A1] rounded-[2.5rem] p-3 flex flex-col shadow-[0_20px_40px_-15px_rgba(13,71,161,0.4)] group overflow-hidden">
             <div className="relative h-56 w-full rounded-[2rem] overflow-hidden">
