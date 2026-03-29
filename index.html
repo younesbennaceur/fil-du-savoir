@@ -1,27 +1,58 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
     <link rel="icon" type="image/png" href="/icon.png" />
 
+    <title>Fil du Savoir — Apprendre, Partager, S'épanouir</title>
     <meta
       name="description"
-      content="EnigmIA est une compétition de résolution d'énigmes mêlant technologie, créativité et esprit d'équipe. Rejoignez-nous pour décoder le futur !"
-    />  
-    
-    <title>EnigmIA — Décryptez le futur</title>
+      content="Association Fil du Savoir à Lieusaint. Cours d'arabe, soutien scolaire, ateliers culturels et actions solidaires pour tous les âges."
+    />
+    <meta name="keywords" content="Association, Lieusaint, Fil du Savoir, cours d'arabe, soutien scolaire, solidarité, culture" />
+    <meta name="author" content="Association Fil du Savoir" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <meta property="og:title" content="Fil du Savoir — Association Socio-Culturelle" />
+    <meta property="og:description" content="Découvrez nos programmes d'apprentissage et nos actions solidaires au cœur de Lieusaint." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/og-image.jpg" /> <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link 
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Poppins:ital,wght@0,400;0,700;0,900;1,400&display=swap" 
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" 
       rel="stylesheet"
     />
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        background-color: #f8fafc; /* bg-slate-50 */
+      }
+
+      /* Scrollbar personnalisée style moderne */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #0d47a1;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
+    
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
