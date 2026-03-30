@@ -30,7 +30,7 @@ const events = [
     date: "15 Mars 2026",
     title: "Atelier pour Enfants",
     desc: "Organisation d'un superbe atelier éducatif et ludique dédié à l'épanouissement des plus jeunes.",
-    image: "kids.jpeg",
+    image: "atelier.jpeg",
     icon: "🎨",
     color: "text-[#3949AB]",
     bg: "bg-indigo-50"

@@ -20,7 +20,7 @@ export default function AdminDashboard() {
     setLoginError('');
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch('https://fil-du-savoir-backend.onrender.com/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: loginEmail, password: loginPassword })
@@ -47,7 +47,7 @@ export default function AdminDashboard() {
   const fetchInscriptions = async () => {
     setIsFetching(true);
     try {
-      const response = await fetch('http://localhost:5000/api/inscriptions/admin', {
+      const response = await fetch('https://fil-du-savoir-backend.onrender.com/api/inscriptions/admin', {
         headers: { 'x-auth-token': token }
       });
       const data = await response.json();
@@ -69,7 +69,7 @@ export default function AdminDashboard() {
 
   const updateStatus = async (id, newStatus) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/inscriptions/admin/${id}/status`, {
+      const response = await fetch(`https://fil-du-savoir-backend.onrender.com/api/inscriptions/admin/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

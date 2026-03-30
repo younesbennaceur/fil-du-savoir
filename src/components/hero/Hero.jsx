@@ -249,7 +249,7 @@ export default function FilDuSavoirPremiumHero() {
           </div>
 
           <div className="hero-card relative w-full lg:flex-1 h-[24rem] lg:h-auto rounded-[2.5rem] overflow-hidden shadow-[0_20px_40px_-15px_rgba(13,71,161,0.2)] border-[6px] border-white group">
-            <img src="/kids.jpeg" alt="Groupe solidaire" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+            <img src="/hero.jpg" alt="Groupe solidaire" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#0D47A1]/60 via-transparent to-transparent opacity-60 transition-opacity group-hover:opacity-80" />
           </div>
 

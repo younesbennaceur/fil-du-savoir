@@ -61,7 +61,7 @@ export default function ThemedRegistrationForm() {
 
     try {
       // Envoi de la requête au serveur Node.js
-      const response = await fetch('http://localhost:5000/api/inscriptions', {
+      const response = await fetch('https://fil-du-savoir-backend.onrender.com/api/inscriptions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
