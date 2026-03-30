@@ -157,7 +157,7 @@ export default function DonationPage() {
               <div className="bg-[#F8FAFC] border border-[#E3F2FD] rounded-xl p-4 relative group">
                 <span className="block text-xs font-bold text-[#1565C0]/50 uppercase tracking-wider mb-1">IBAN de l'Association</span>
                 <span className="block font-mono font-bold text-[#0D47A1] text-sm break-all">
-                  FR76 1234 5678 9012 3456 7890 123
+                  FR81 3000 2069 7600 0007 1263 U39
                 </span>
                 
                 {/* Bouton de copie interactif */}
