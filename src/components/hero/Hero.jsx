@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { Draggable } from 'gsap/Draggable';
-import { Link } from 'react-router-dom'; // CORRECTION : Import du vrai composant de routing
+import { Link } from 'react-router-dom';
 
 gsap.registerPlugin(Draggable);
 
@@ -39,6 +39,10 @@ const ZigzagWave = ({ className }) => (
 export default function FilDuSavoirPremiumHero() {
   const containerRef = useRef(null);
   const textRef = useRef(null);
+  const popupModalRef = useRef(null);
+  
+  // ── État pour contrôler l'affichage du Pop-up ──
+  const [showEventPopup, setShowEventPopup] = useState(true);
 
   // ── Cartes d'Activités (Draggables) ──
   const activitiesCards = [
@@ -73,7 +77,15 @@ export default function FilDuSavoirPremiumHero() {
   ];
 
   useEffect(() => {
-    // 1. Initialisation des Draggables premium
+    // 1. Animation GSAP du Pop-up au montage
+    if (showEventPopup && popupModalRef.current) {
+      gsap.fromTo(popupModalRef.current, 
+        { opacity: 0, scale: 0.75, y: 40 }, 
+        { opacity: 1, scale: 1, y: 0, duration: 0.7, ease: "back.out(1.3)", delay: 0.5 }
+      );
+    }
+
+    // 2. Initialisation des Draggables premium
     Draggable.create('.fds-drag', {
       bounds: containerRef.current,
       inertia: true,
@@ -111,13 +123,13 @@ export default function FilDuSavoirPremiumHero() {
       stagger: 0.2 
     });
 
-    // 2. Arrière-plan : Orbes & Lignes SVG
+    // 3. Arrière-plan : Orbes & Lignes SVG
     gsap.to('.orb-1', { y: -60, x: 50, scale: 1.1, duration: 8, repeat: -1, yoyo: true, ease: 'sine.inOut' });
     gsap.to('.orb-2', { y: 50, x: -40, scale: 1.2, duration: 10, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: 1 });
     gsap.to('.bg-thread-1', { y: 30, x: -20, rotation: 2, duration: 6, repeat: -1, yoyo: true, ease: 'sine.inOut' });
     gsap.to('.bg-thread-2', { y: -25, x: 20, rotation: -2, duration: 7, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: 0.5 });
 
-    // 3. Apparition au chargement
+    // 4. Apparition des éléments du Hero
     const tl = gsap.timeline({ delay: 0.3 });
     tl.fromTo(textRef.current.children, 
         { opacity: 0, y: 30 }, 
@@ -134,14 +146,103 @@ export default function FilDuSavoirPremiumHero() {
         "-=0.5"
       );
 
-  }, []);
+  }, [showEventPopup]);
+
+  // Fonction pour fermer avec une petite animation
+  const handleClosePopup = () => {
+    gsap.to(popupModalRef.current, {
+      opacity: 0,
+      scale: 0.8,
+      y: 30,
+      duration: 0.3,
+      ease: "power2.in",
+      onComplete: () => setShowEventPopup(false)
+    });
+  };
 
   return (
     <section id='accueil' ref={containerRef} className="relative min-h-screen bg-[#F8FAFC] font-sans overflow-hidden flex flex-col pb-20 pt-20">
       
       {/* ========================================= */}
-      {/* 🎨 ARRIÈRE-PLAN CRÉATIF 🎨 */}
+      {/* 📢 POP-UP ANNONCE ÉVÉNEMENT (MODAL) 📢    */}
       {/* ========================================= */}
+      {showEventPopup && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md transition-opacity">
+          
+          <div 
+            ref={popupModalRef} 
+            className="relative w-full max-w-4xl bg-white rounded-[2.5rem] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.3)] overflow-hidden border border-white flex flex-col md:flex-row items-stretch"
+          >
+            {/* Bouton de fermeture (Croix) */}
+            <button 
+              onClick={handleClosePopup}
+              className="absolute top-4 right-4 z-20 w-11 h-11 bg-white/90 md:bg-[#F8FAFC] text-[#0D47A1] hover:bg-[#0D47A1] hover:text-white rounded-full flex items-center justify-center font-bold text-xl shadow-md transition-all duration-300"
+              aria-label="Fermer"
+            >
+              ✕
+            </button>
+
+            {/* Partie Gauche : Image de l'affiche */}
+            <div className="w-full md:w-1/2 bg-[#F4F9FF] flex items-center justify-center p-4 md:p-6 border-b md:border-b-0 md:border-r border-[#E3F2FD] relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-tr from-[#1565C0]/5 to-transparent z-0" />
+              <img 
+                src="/event.png" 
+                alt="Affiche Conférence La santé du coeur" 
+                className="w-full h-auto max-h-[50vh] md:max-h-[65vh] object-contain rounded-2xl shadow-lg relative z-10 hover:scale-[1.02] transition-transform duration-300"
+              />
+            </div>
+
+            {/* Partie Droite : Contenu Informatif & Call to Action */}
+            <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col justify-center bg-white text-left">
+              
+              <div className="inline-flex items-center gap-2 mb-3">
+                <span className="animate-pulse w-2.5 h-2.5 rounded-full bg-[#E91E63]" />
+                <span className="text-xs font-extrabold uppercase tracking-widest text-[#E91E63] bg-[#E91E63]/10 px-3 py-1 rounded-full">
+                  Événement Spécial
+                </span>
+              </div>
+
+              <h2 className="text-2xl md:text-3xl font-extrabold text-[#0D47A1] leading-tight mb-3">
+                Conférence : <br/>La santé du cœur ❤️
+              </h2>
+              
+              <p className="text-[#1565C0]/80 text-sm font-medium mb-5 line-clamp-3">
+                En collaboration avec une cardiologue professionnelle. Venez vous informer et poser vos questions lors de cette journée exceptionnelle, suivie d'un repas convivial.
+              </p>
+
+              {/* Bloc Détails rapides */}
+              <div className="bg-[#F8FAFC] p-4 rounded-2xl border border-[#E3F2FD] space-y-2.5 mb-6 text-xs text-[#0D47A1]">
+                <div className="flex items-center gap-2 font-bold">
+                  <span className="text-base">📅</span> 23 Mai 2026 — 12h00 à 17h30
+                </div>
+                <div className="flex items-center gap-2 font-bold">
+                  <span className="text-base">📍</span> Centre social, 43 rue de Paris, Lieusaint
+                </div>
+                <div className="flex items-center gap-2 font-semibold text-[#E91E63]">
+                  <span className="text-base">🎟️</span> Tarif : 20€ (Places limitées)
+                </div>
+              </div>
+
+              {/* Call To Action (Scanner ou Appeler) */}
+              <div className="space-y-3 mt-auto">
+                <div className="p-3 bg-gradient-to-r from-[#1565C0] to-[#00ACC1] text-white rounded-xl text-center font-bold shadow-md hover:shadow-lg transition-all">
+                  <p className="text-xs text-[#BBDEFB] uppercase tracking-wider mb-0.5">Pour participer :</p>
+                  <p className="text-sm">📲 Scannez le QR Code sur l'affiche !</p>
+                </div>
+
+                <p className="text-center text-[11px] text-[#1565C0]/70 font-medium">
+                  Ou contactez-nous au <strong className="text-[#0D47A1]">06.16.23.90.58</strong>
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      )}
+      {/* ========================================= */}
+
+      {/* 🎨 ARRIÈRE-PLAN CRÉATIF 🎨 */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.35] z-0" 
         style={{ 
           backgroundImage: `linear-gradient(to right, rgba(21, 101, 192, 0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(21, 101, 192, 0.1) 1px, transparent 1px)`, 
@@ -158,20 +259,16 @@ export default function FilDuSavoirPremiumHero() {
 
       <div className="orb-1 absolute top-[-15%] left-[-10%] w-[50vw] h-[50vw] bg-[#42A5F5]/15 rounded-full blur-[140px] pointer-events-none z-0" />
       <div className="orb-2 absolute bottom-[-15%] right-[-10%] w-[55vw] h-[55vw] bg-[#00ACC1]/15 rounded-full blur-[160px] pointer-events-none z-0" />
-      
-      {/* ========================================= */}
 
-      {/* ── CARTES D'ACTIVITÉS (Nouveau design épuré) ── */}
+      {/* ── CARTES D'ACTIVITÉS (Draggables) ── */}
       {activitiesCards.map((item, idx) => (
         <div key={idx} className="fds-drag absolute z-40 hidden xl:block group cursor-grab p-2" style={{ top: item.top, left: item.left }}>
           <div className="fds-drag-inner relative w-[270px] bg-white/80 backdrop-blur-xl border border-white/80 p-4 rounded-2xl shadow-[0_8px_30px_rgb(21,101,192,0.08)] transition-all duration-300 group-hover:bg-white group-hover:border-[#42A5F5]/30 group-hover:shadow-[0_15px_40px_rgb(21,101,192,0.15)] flex items-center gap-4">
             
-            {/* Icône */}
             <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center text-2xl shadow-sm shrink-0 border ${item.bg}`}>
               {item.icon}
             </div>
 
-            {/* Texte de l'activité */}
             <div className="flex flex-col text-left">
               <h4 className="text-[#0D47A1] font-bold text-sm leading-tight mb-1">{item.title}</h4>
               <p className="text-[#1565C0]/75 text-[11px] font-medium leading-snug">
@@ -212,7 +309,6 @@ export default function FilDuSavoirPremiumHero() {
           </p>
 
           <div className="flex flex-wrap justify-center gap-5 items-center pointer-events-auto">
-            {/* BOUTON DON (Lien Routeur) */}
             <Link to="/don" className="relative group overflow-hidden bg-[#0D47A1] text-white px-9 py-4 rounded-full font-bold shadow-[0_10px_20px_rgba(13,71,161,0.3)] hover:shadow-[0_15px_30px_rgba(13,71,161,0.4)] hover:-translate-y-1 transition-all duration-300">
               <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#1565C0] to-[#00ACC1] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <span className="relative flex items-center gap-2">
@@ -220,7 +316,6 @@ export default function FilDuSavoirPremiumHero() {
               </span>
             </Link>
             
-            {/* BOUTON DÉCOUVRIR (Lien Ancre) */}
             <a href="#evenements" className="text-[#0D47A1] flex gap-3 items-center font-bold px-7 py-4 rounded-full bg-white border border-[#E3F2FD] shadow-sm hover:border-[#42A5F5]/50 hover:bg-[#F4F9FF] transition-all group hover:-translate-y-1">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[#E3F2FD] text-[#00ACC1] group-hover:bg-[#00ACC1] group-hover:text-white transition-colors duration-300 shadow-inner">
                 <PlayIcon />
@@ -261,7 +356,6 @@ export default function FilDuSavoirPremiumHero() {
             <ZigzagWave className="absolute top-44 left-0 w-full opacity-60" />
             <div className="mt-8 px-4 z-10 flex-1 flex flex-col pt-2">
               <h3 className="text-white text-xl font-bold leading-tight mb-4">Soutenez<br/>l'apprentissage</h3>
-              {/* BOUTON COMMENT AIDER (Lien Routeur) */}
               <Link 
                 to="/don" 
                 className="mt-auto mb-2 w-full text-center flex items-center justify-center bg-white/10 hover:bg-white/20 border border-white/20 text-white py-3.5 rounded-full text-sm font-bold backdrop-blur-md transition-all hover:shadow-lg"
