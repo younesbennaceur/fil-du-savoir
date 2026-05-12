@@ -80,8 +80,8 @@ export default function FilDuSavoirPremiumHero() {
     // 1. Animation GSAP du Pop-up au montage
     if (showEventPopup && popupModalRef.current) {
       gsap.fromTo(popupModalRef.current, 
-        { opacity: 0, scale: 0.75, y: 40 }, 
-        { opacity: 1, scale: 1, y: 0, duration: 0.7, ease: "back.out(1.3)", delay: 0.5 }
+        { opacity: 0, scale: 0.8, y: 30 }, 
+        { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: "back.out(1.2)", delay: 0.4 }
       );
     }
 
@@ -152,9 +152,9 @@ export default function FilDuSavoirPremiumHero() {
   const handleClosePopup = () => {
     gsap.to(popupModalRef.current, {
       opacity: 0,
-      scale: 0.8,
-      y: 30,
-      duration: 0.3,
+      scale: 0.9,
+      y: 20,
+      duration: 0.25,
       ease: "power2.in",
       onComplete: () => setShowEventPopup(false)
     });
@@ -163,75 +163,82 @@ export default function FilDuSavoirPremiumHero() {
   return (
     <section id='accueil' ref={containerRef} className="relative min-h-screen bg-[#F8FAFC] font-sans overflow-hidden flex flex-col pb-20 pt-20">
       
-      {/* ========================================= */}
-      {/* 📢 POP-UP ANNONCE ÉVÉNEMENT (MODAL) 📢    */}
-      {/* ========================================= */}
+      {/* ======================================================= */}
+      {/* 📢 POP-UP ANNONCE ÉVÉNEMENT (100% RESPONSIVE) 📢       */}
+      {/* ======================================================= */}
       {showEventPopup && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md transition-opacity">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 md:p-4 bg-black/60 backdrop-blur-sm transition-opacity">
           
           <div 
             ref={popupModalRef} 
-            className="relative w-full max-w-4xl bg-white rounded-[2.5rem] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.3)] overflow-hidden border border-white flex flex-col md:flex-row items-stretch"
+            // Ajout de max-h-[90vh] et overflow-y-auto pour que le contenu défile sur petit mobile
+            className="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-[1.75rem] md:rounded-[2.5rem] shadow-2xl overflow-y-auto border border-white flex flex-col md:flex-row items-stretch"
           >
             {/* Bouton de fermeture (Croix) */}
             <button 
               onClick={handleClosePopup}
-              className="absolute top-4 right-4 z-20 w-11 h-11 bg-white/90 md:bg-[#F8FAFC] text-[#0D47A1] hover:bg-[#0D47A1] hover:text-white rounded-full flex items-center justify-center font-bold text-xl shadow-md transition-all duration-300"
+              className="absolute top-3 right-3 md:top-4 md:right-4 z-20 w-9 h-9 md:w-11 md:h-11 bg-white/95 md:bg-[#F8FAFC] text-[#0D47A1] hover:bg-[#0D47A1] hover:text-white rounded-full flex items-center justify-center font-bold text-lg md:text-xl shadow transition-all duration-300"
               aria-label="Fermer"
             >
               ✕
             </button>
 
-            {/* Partie Gauche : Image de l'affiche */}
-            <div className="w-full md:w-1/2 bg-[#F4F9FF] flex items-center justify-center p-4 md:p-6 border-b md:border-b-0 md:border-r border-[#E3F2FD] relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-tr from-[#1565C0]/5 to-transparent z-0" />
+            {/* Partie Gauche : Image de l'affiche (Hauteur réduite sur mobile) */}
+            <div className="w-full md:w-1/2 bg-[#F4F9FF] flex items-center justify-center p-3 md:p-6 border-b md:border-b-0 md:border-r border-[#E3F2FD] shrink-0">
               <img 
                 src="/event.png" 
                 alt="Affiche Conférence La santé du coeur" 
-                className="w-full h-auto max-h-[50vh] md:max-h-[65vh] object-contain rounded-2xl shadow-lg relative z-10 hover:scale-[1.02] transition-transform duration-300"
+                className="w-full h-auto max-h-[28vh] md:max-h-[65vh] object-contain rounded-xl shadow-sm hover:scale-[1.02] transition-transform duration-300"
               />
             </div>
 
-            {/* Partie Droite : Contenu Informatif & Call to Action */}
-            <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col justify-center bg-white text-left">
+            {/* Partie Droite : Contenu & Bouton d'action */}
+            <div className="w-full md:w-1/2 p-5 md:p-9 flex flex-col justify-between bg-white text-left">
               
-              <div className="inline-flex items-center gap-2 mb-3">
-                <span className="animate-pulse w-2.5 h-2.5 rounded-full bg-[#E91E63]" />
-                <span className="text-xs font-extrabold uppercase tracking-widest text-[#E91E63] bg-[#E91E63]/10 px-3 py-1 rounded-full">
-                  Événement Spécial
-                </span>
+              <div>
+                <div className="inline-flex items-center gap-2 mb-2">
+                  <span className="animate-pulse w-2 h-2 rounded-full bg-[#E91E63]" />
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#E91E63] bg-[#E91E63]/10 px-2.5 py-0.5 rounded-full">
+                    Événement Spécial
+                  </span>
+                </div>
+
+                <h2 className="text-xl md:text-3xl font-extrabold text-[#0D47A1] leading-tight mb-2">
+                  Conférence : <br className="hidden md:block"/>La santé du cœur ❤️
+                </h2>
+                
+                <p className="text-[#1565C0]/80 text-xs md:text-sm font-medium mb-4">
+                  En collaboration avec une cardiologue. Venez vous informer et poser vos questions lors de cette journée exceptionnelle, suivie d'un repas convivial.
+                </p>
+
+                {/* Bloc Détails plus resserré sur mobile */}
+                <div className="bg-[#F8FAFC] p-3 md:p-4 rounded-xl border border-[#E3F2FD] space-y-1.5 md:space-y-2 mb-5 text-xs text-[#0D47A1]">
+                  <div className="flex items-center gap-2 font-bold">
+                    <span className="text-sm">📅</span> 23 Mai 2026 — 12h00 à 17h30
+                  </div>
+                  <div className="flex items-center gap-2 font-bold">
+                    <span className="text-sm">📍</span> Centre social, 43 rue de Paris, Lieusaint
+                  </div>
+                  <div className="flex items-center gap-2 font-semibold text-[#E91E63]">
+                    <span className="text-sm">🎟️</span> Tarif : 20€ (Repas inclus)
+                  </div>
+                </div>
               </div>
 
-              <h2 className="text-2xl md:text-3xl font-extrabold text-[#0D47A1] leading-tight mb-3">
-                Conférence : <br/>La santé du cœur ❤️
-              </h2>
-              
-              <p className="text-[#1565C0]/80 text-sm font-medium mb-5 line-clamp-3">
-                En collaboration avec une cardiologue professionnelle. Venez vous informer et poser vos questions lors de cette journée exceptionnelle, suivie d'un repas convivial.
-              </p>
+              {/* Call To Action relié à Yapla */}
+              <div className="mt-2 space-y-2">
+                <a 
+                  href="https://fil-du-savoir.s2.yapla.com/fr/event-115234"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full p-3 md:p-3.5 bg-gradient-to-r from-[#1565C0] to-[#00ACC1] text-white rounded-xl text-center font-bold shadow-md hover:shadow-lg hover:opacity-95 transition-all"
+                >
+                  <span className="text-[10px] md:text-[11px] text-[#BBDEFB] uppercase tracking-wider block mb-0.5">Places limitées</span>
+                  <span className="text-xs md:text-sm block">Réserver ma place en ligne 🎟️</span>
+                </a>
 
-              {/* Bloc Détails rapides */}
-              <div className="bg-[#F8FAFC] p-4 rounded-2xl border border-[#E3F2FD] space-y-2.5 mb-6 text-xs text-[#0D47A1]">
-                <div className="flex items-center gap-2 font-bold">
-                  <span className="text-base">📅</span> 23 Mai 2026 — 12h00 à 17h30
-                </div>
-                <div className="flex items-center gap-2 font-bold">
-                  <span className="text-base">📍</span> Centre social, 43 rue de Paris, Lieusaint
-                </div>
-                <div className="flex items-center gap-2 font-semibold text-[#E91E63]">
-                  <span className="text-base">🎟️</span> Tarif : 20€ (Places limitées)
-                </div>
-              </div>
-
-              {/* Call To Action (Scanner ou Appeler) */}
-              <div className="space-y-3 mt-auto">
-                <div className="p-3 bg-gradient-to-r from-[#1565C0] to-[#00ACC1] text-white rounded-xl text-center font-bold shadow-md hover:shadow-lg transition-all">
-                  <p className="text-xs text-[#BBDEFB] uppercase tracking-wider mb-0.5">Pour participer :</p>
-                  <p className="text-sm">📲 Scannez le QR Code sur l'affiche !</p>
-                </div>
-
-                <p className="text-center text-[11px] text-[#1565C0]/70 font-medium">
-                  Ou contactez-nous au <strong className="text-[#0D47A1]">06.16.23.90.58</strong>
+                <p className="text-center text-[10px] md:text-[11px] text-[#1565C0]/70 font-medium mb-0">
+                  Renseignements par téléphone au <strong className="text-[#0D47A1]">06.16.23.90.58</strong>
                 </p>
               </div>
 
@@ -240,7 +247,7 @@ export default function FilDuSavoirPremiumHero() {
           </div>
         </div>
       )}
-      {/* ========================================= */}
+      {/* ======================================================= */}
 
       {/* 🎨 ARRIÈRE-PLAN CRÉATIF 🎨 */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.35] z-0" 
