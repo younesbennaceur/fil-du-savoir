@@ -1,330 +1,160 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { gsap } from 'gsap';
-import Navigation from '../components/nav/Navigation'; // Ajuste le chemin si besoin
+import { useState } from 'react';
+import Navigation from '../components/nav/Navigation';
+import { API_URL } from '../config/api';
 
-export default function ThemedRegistrationForm() {
-  const containerRef = useRef(null);
-  const formRef = useRef(null);
-  
-  // ── 1. ETAT DU FORMULAIRE (Correspond exactement à ton modèle backend) ──
-  const [courseType, setCourseType] = useState('arabe_enfant');
-  const [formData, setFormData] = useState({
-    parentName: '',
-    parentAddress: '',
-    parentPhone: '',
-    parentEmail: '',
-    studentName: '',
-    studentAge: '',
-    studentPhone: '',
-    level: '',
-    soutienClass: '',
-    schedules: [], // Tableau pour les cases cochées
-    signature: ''
-  });
+const COURSES = [
+  { group: 'Langue arabe enfants', id: 'arabe_enfant_samedi_matin', label: 'Samedi 9h30 à 12h - niveau 1 et CP' },
+  { group: 'Langue arabe enfants', id: 'arabe_enfant_dimanche_matin', label: 'Dimanche 9h30 à 12h - maternelle et CP' },
+  { group: 'Langue arabe enfants', id: 'arabe_enfant_samedi_apres_midi', label: 'Samedi 14h à 16h30 - niveaux 1 à 3' },
+  { group: 'Langue arabe enfants', id: 'arabe_enfant_dimanche_apres_midi', label: 'Dimanche 14h à 16h30 - niveaux 1 à 3' },
+  { group: 'Langue arabe enfants', id: 'arabe_enfant_mercredi', label: 'Mercredi 14h30 à 17h - maternelle et CP' },
+  { group: 'Soutien scolaire', id: 'soutien_scolaire_samedi', label: 'Samedi 16h30 à 18h30 - aide aux devoirs' },
+  { group: 'Langue arabe femmes adultes', id: 'arabe_femme_vendredi', label: 'Vendredi 19h à 21h - niveau 2' },
+  { group: 'Langue arabe femmes adultes', id: 'arabe_femme_dimanche', label: 'Dimanche 18h à 20h - niveau 1' },
+  { group: 'Sciences islamiques jeunes adolescentes', id: 'sciences_islamiques_mardi', label: 'Mardi 18h à 20h' }
+];
 
-  // États pour l'interface utilisateur (UX)
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+const EMPTY_FORM = {
+  registrationType: 'inscription', childLastName: '', childFirstName: '', childGender: '',
+  childBirthDate: '', childBirthPlace: '', addressStreetNumber: '', addressStreet: '',
+  addressCity: '', addressPostalCode: '', fatherName: '', fatherPhone: '', fatherEmail: '',
+  motherName: '', motherPhone: '', motherEmail: '', courseChoices: [],
+  imageRightsInternal: null, imageRightsExternal: null, signerName: '', signatureDate: new Date().toISOString().slice(0, 10)
+};
 
-  // ── 2. FONCTIONS DE GESTION DES CHAMPS ──
-  // Pour les champs textes normaux
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+const fieldClass = 'mt-1.5 h-11 w-full rounded-xl border border-blue-100 bg-white px-3 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100';
 
-  // Pour les cases à cocher (Horaires)
-  const handleScheduleToggle = (horaire) => {
-    setFormData((prev) => {
-      const isSelected = prev.schedules.includes(horaire);
-      if (isSelected) {
-        return { ...prev, schedules: prev.schedules.filter(h => h !== horaire) };
-      } else {
-        return { ...prev, schedules: [...prev.schedules, horaire] };
-      }
-    });
-  };
+export default function InscriptionPage() {
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState(null);
 
-  // ── 3. SOUMISSION AU BACKEND ──
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setErrorMessage('');
-    setIsSuccess(false);
+  const change = ({ target: { name, value } }) => setForm((current) => ({ ...current, [name]: value }));
+  const setConsent = (name, value) => setForm((current) => ({ ...current, [name]: value }));
+  const toggleCourse = (id) => setForm((current) => ({
+    ...current,
+    courseChoices: current.courseChoices.includes(id)
+      ? current.courseChoices.filter((choice) => choice !== id)
+      : [...current.courseChoices, id]
+  }));
 
-    // Préparation des données finales
-    const dataToSend = {
-      ...formData,
-      courseType: courseType
-    };
+  const submit = async (event) => {
+    event.preventDefault();
+    setMessage(null);
+    if (!form.courseChoices.length) return setMessage({ type: 'error', text: 'Choisissez au moins un cours.' });
+    const contactEmail = form.fatherEmail || form.motherEmail;
+    if (!contactEmail) return setMessage({ type: 'error', text: 'Renseignez l’e-mail d’au moins un parent.' });
+    if ((!form.fatherName || !form.fatherPhone) && (!form.motherName || !form.motherPhone)) {
+      return setMessage({ type: 'error', text: 'Renseignez le nom et le téléphone d’au moins un parent.' });
+    }
 
+    setLoading(true);
     try {
-      // Envoi de la requête au serveur Node.js
-      const response = await fetch('https://fil-du-savoir-backend.onrender.com/api/inscriptions', {
+      const response = await fetch(`${API_URL}/api/inscriptions`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dataToSend),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...form, contactEmail })
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setIsSuccess(true);
-        // Optionnel : Vider le formulaire après succès
-        setFormData({
-          parentName: '', parentAddress: '', parentPhone: '', parentEmail: '',
-          studentName: '', studentAge: '', studentPhone: '', level: '',
-          soutienClass: '', schedules: [], signature: ''
-        });
-        
-        // Petit scroll vers le haut pour voir le message de succès
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        setErrorMessage(data.message || "Une erreur s'est produite lors de l'inscription.");
-      }
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || 'Le dossier n’a pas pu être envoyé.');
+      setMessage({ type: 'success', text: data.message });
+      setForm({ ...EMPTY_FORM, signatureDate: new Date().toISOString().slice(0, 10) });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
-      console.error("Erreur serveur:", error);
-      setErrorMessage("Impossible de se connecter au serveur. Vérifiez qu'il est bien lancé.");
+      setMessage({ type: 'error', text: error.message });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    // Animation GSAP
-    const cards = gsap.utils.toArray('.form-card');
-    gsap.fromTo(cards,
-      { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, stagger: 0.1, duration: 0.7, ease: "power3.out", delay: 0.2 }
-    );
-
-    gsap.to('.theme-orb', {
-      y: -20, x: 20, duration: 6, yoyo: true, repeat: -1, ease: "sine.inOut"
-    });
-  }, []);
+  const groupedCourses = COURSES.reduce((groups, course) => {
+    groups[course.group] = [...(groups[course.group] || []), course];
+    return groups;
+  }, {});
 
   return (
-    <section ref={containerRef} className="relative min-h-screen bg-[#F8FAFC] py-20 px-4 md:px-8 font-sans overflow-hidden">
+    <main className="min-h-screen bg-[#f6f9ff] text-slate-800">
       <Navigation />
-      
-      {/* ── ARRIÈRE-PLAN ── */}
-      <div className="absolute inset-0 pointer-events-none opacity-40 z-0" 
-        style={{ 
-          backgroundImage: 'radial-gradient(#1565C0 1px, transparent 1px)', 
-          backgroundSize: '32px 32px',
-          maskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)'
-        }} 
-      />
-      <div className="theme-orb absolute top-[-10%] left-[-5%] w-[40vw] h-[40vw] bg-[#E3F2FD] rounded-full blur-[120px] pointer-events-none z-0 mix-blend-multiply" />
-      <div className="theme-orb absolute bottom-[20%] right-[-5%] w-[30vw] h-[30vw] bg-[#E0F7FA] rounded-full blur-[100px] pointer-events-none z-0 mix-blend-multiply" />
+      <div className="mx-auto max-w-5xl px-4 pb-20 pt-36 md:px-8">
+        <header className="mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-[#073da5] to-[#1267d8] px-6 py-10 text-white shadow-xl shadow-blue-200 md:px-10">
+          <p className="text-sm font-bold uppercase tracking-[.24em] text-blue-100">Association Fil du Savoir</p>
+          <h1 className="mt-2 text-3xl font-black md:text-5xl">Inscriptions 2026-2027</h1>
+          <p className="mt-3 max-w-2xl text-blue-50">Fiche d’inscription en ligne · places limitées</p>
+        </header>
 
-      <div className="max-w-3xl mx-auto relative z-10">
-        
-        {/* ── EN-TÊTE ── */}
-        <div className="mb-12 mt-16 text-center md:text-left form-card">
-          <span className="inline-block py-1.5 px-4 rounded-full bg-white text-[#00ACC1] text-xs font-bold tracking-widest uppercase mb-4 border border-[#E0F7FA] shadow-sm">
-            Inscription 2026
-          </span>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#0D47A1] mb-3">
-            Rejoignez l'aventure
-          </h1>
-          <p className="text-[#1565C0]/70 text-base max-w-2xl leading-relaxed font-medium">
-            L’association Fil du Savoir vous accueille dans les locaux de la mairie de Lieusaint pour son programme d’apprentissage et de soutien.
-          </p>
-        </div>
+        {message && <div role="alert" className={`mb-6 rounded-2xl border p-4 font-semibold ${message.type === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-red-200 bg-red-50 text-red-700'}`}>{message.text}</div>}
 
-       {/* ── POP-UP DE SUCCÈS (Style shadcn/ui) ── */}
-      {isSuccess && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 transition-all duration-300">
-          <div className="relative w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-lg animate-in fade-in zoom-in-95 duration-200">
-            
-            {/* Bouton Fermer (Croix en haut à droite) */}
-            <button 
-              onClick={() => setIsSuccess(false)}
-              className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-500">
-                <line x1="18" x2="6" y1="6" y2="18"></line>
-                <line x1="6" x2="18" y1="6" y2="18"></line>
-              </svg>
-              <span className="sr-only">Fermer</span>
-            </button>
-
-            {/* Contenu de la Modal */}
-            <div className="flex flex-col items-center text-center space-y-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#E0F7FA] mb-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00ACC1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                </svg>
-              </div>
-              <h2 className="text-xl font-bold tracking-tight text-[#0D47A1]">
-                Inscription confirmée !
-              </h2>
-              <p className="text-sm text-slate-500 leading-relaxed">
-                Merci pour votre confiance. L'équipe du Fil du Savoir a bien reçu votre demande et la traitera dans les plus brefs délais.
-              </p>
+        <form onSubmit={submit} className="space-y-6">
+          <Section title="Informations civiles">
+            <div className="grid gap-5 md:grid-cols-2">
+              <Choice name="registrationType" label="Type de dossier" value={form.registrationType} options={[['inscription', 'Inscription'], ['renouvellement', 'Renouvellement']]} onChange={change} />
+              <Choice name="childGender" label="Sexe de l’enfant" value={form.childGender} options={[['F', 'Fille'], ['M', 'Garçon']]} onChange={change} required />
+              <Field label="Nom de l’enfant" name="childLastName" value={form.childLastName} onChange={change} required />
+              <Field label="Prénom de l’enfant" name="childFirstName" value={form.childFirstName} onChange={change} required />
+              <Field label="Date de naissance" name="childBirthDate" type="date" value={form.childBirthDate} onChange={change} required />
+              <Field label="Lieu de naissance" name="childBirthPlace" value={form.childBirthPlace} onChange={change} required />
+              <Field label="N° de rue" name="addressStreetNumber" value={form.addressStreetNumber} onChange={change} />
+              <Field label="Rue" name="addressStreet" value={form.addressStreet} onChange={change} required />
+              <Field label="Commune" name="addressCity" value={form.addressCity} onChange={change} required />
+              <Field label="Code postal" name="addressPostalCode" inputMode="numeric" value={form.addressPostalCode} onChange={change} required />
             </div>
+          </Section>
 
-            {/* Bouton d'action */}
-            <div className="mt-6 flex justify-center sm:justify-end">
-              <button
-                onClick={() => setIsSuccess(false)}
-                className="inline-flex h-10 items-center justify-center rounded-md bg-[#0D47A1] px-4 py-2 text-sm font-medium text-white ring-offset-white transition-colors hover:bg-[#1565C0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 w-full sm:w-auto"
-              >
-                Fermer
-              </button>
+          <Section title="Contact avec les parents" subtitle="Le nom et le téléphone d’au moins un parent sont obligatoires.">
+            <div className="grid gap-6 md:grid-cols-2">
+              <ParentFields title="Père" prefix="father" form={form} onChange={change} />
+              <ParentFields title="Mère" prefix="mother" form={form} onChange={change} />
             </div>
-            
-          </div>
-        </div>
-      )}
+          </Section>
 
-        {errorMessage && (
-          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 font-medium text-sm form-card">
-            ⚠️ {errorMessage}
-          </div>
-        )}
-
-        {/* ── FORMULAIRE ── */}
-        <form ref={formRef} className="space-y-6" onSubmit={handleSubmit}>
-          
-          {/* SECTION 1 : PARENTS */}
-          <div className="form-card rounded-2xl border border-[#BBDEFB] bg-white shadow-sm overflow-hidden">
-            <div className="bg-[#F4F9FF] px-6 py-4 border-b border-[#BBDEFB]">
-              <h3 className="font-bold text-[#0D47A1]">Informations Personnelles (Parents)</h3>
-            </div>
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="space-y-1.5 md:col-span-2">
-                <label className="text-sm font-semibold text-[#0D47A1]">Nom et prénom *</label>
-                <input required name="parentName" value={formData.parentName} onChange={handleChange} className="flex h-10 w-full rounded-lg border border-[#E3F2FD] bg-white px-3 py-2 text-sm text-[#0D47A1] focus:ring-2 focus:ring-[#00ACC1] outline-none transition-all" />
-              </div>
-              <div className="space-y-1.5 md:col-span-2">
-                <label className="text-sm font-semibold text-[#0D47A1]">Adresse complète *</label>
-                <input required name="parentAddress" value={formData.parentAddress} onChange={handleChange} className="flex h-10 w-full rounded-lg border border-[#E3F2FD] bg-white px-3 py-2 text-sm text-[#0D47A1] focus:ring-2 focus:ring-[#00ACC1] outline-none transition-all" />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-[#0D47A1]">Téléphone *</label>
-                <input required type="tel" name="parentPhone" value={formData.parentPhone} onChange={handleChange} className="flex h-10 w-full rounded-lg border border-[#E3F2FD] bg-white px-3 py-2 text-sm text-[#0D47A1] focus:ring-2 focus:ring-[#00ACC1] outline-none transition-all" />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-[#0D47A1]">Adresse e-mail *</label>
-                <input required type="email" name="parentEmail" value={formData.parentEmail} onChange={handleChange} className="flex h-10 w-full rounded-lg border border-[#E3F2FD] bg-white px-3 py-2 text-sm text-[#0D47A1] focus:ring-2 focus:ring-[#00ACC1] outline-none transition-all" />
-              </div>
-            </div>
-          </div>
-
-          {/* SECTION 2 : APPRENANT */}
-          <div className="form-card rounded-2xl border border-[#BBDEFB] bg-white shadow-sm overflow-hidden">
-            <div className="bg-[#F4F9FF] px-6 py-4 border-b border-[#BBDEFB]">
-              <h3 className="font-bold text-[#0D47A1]">Informations sur l’apprenant</h3>
-            </div>
-            <div className="p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="space-y-1.5 md:col-span-2">
-                  <label className="text-sm font-semibold text-[#0D47A1]">Nom et prénom de l'élève *</label>
-                  <input required name="studentName" value={formData.studentName} onChange={handleChange} className="flex h-10 w-full rounded-lg border border-[#E3F2FD] bg-white px-3 py-2 text-sm text-[#0D47A1] focus:ring-2 focus:ring-[#00ACC1] outline-none transition-all" />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-[#0D47A1]">Âge *</label>
-                  <input required type="number" name="studentAge" value={formData.studentAge} onChange={handleChange} className="flex h-10 w-full rounded-lg border border-[#E3F2FD] bg-white px-3 py-2 text-sm text-[#0D47A1] focus:ring-2 focus:ring-[#00ACC1] outline-none transition-all" />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-[#0D47A1]">Téléphone (si différent)</label>
-                  <input type="tel" name="studentPhone" value={formData.studentPhone} onChange={handleChange} className="flex h-10 w-full rounded-lg border border-[#E3F2FD] bg-white px-3 py-2 text-sm text-[#0D47A1] focus:ring-2 focus:ring-[#00ACC1] outline-none transition-all" />
-                </div>
-              </div>
-
-              {/* Toggle Group Niveau */}
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-[#0D47A1]">Niveau actuel en langue arabe *</label>
-                <div className="flex flex-wrap gap-2">
-                  {['Maternelle 5ans', 'CP', 'Niveau 1', 'Niveau 2', 'Niveau 3'].map((niv) => (
-                    <label key={niv} className="relative flex cursor-pointer items-center justify-center rounded-lg border border-[#E3F2FD] bg-white px-4 py-2 text-sm font-semibold text-[#1565C0] transition-colors hover:bg-[#F4F9FF] has-[:checked]:bg-[#00ACC1] has-[:checked]:text-white has-[:checked]:border-[#00ACC1] shadow-sm">
-                      <input required type="radio" name="level" value={niv} checked={formData.level === niv} onChange={handleChange} className="sr-only" />
-                      {niv}
-                    </label>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-[#0D47A1]">Ou Soutien scolaire, précisez la classe :</label>
-                <input type="text" name="soutienClass" value={formData.soutienClass} onChange={handleChange} className="flex h-10 w-full md:w-1/2 rounded-lg border border-[#E3F2FD] bg-white px-3 py-2 text-sm text-[#0D47A1] focus:ring-2 focus:ring-[#00ACC1] outline-none transition-all" placeholder="Ex: CM1, 4ème..." />
-              </div>
-            </div>
-          </div>
-
-          {/* SECTION 3 : CHOIX DU COURS */}
-          <div className="form-card rounded-2xl border border-[#BBDEFB] bg-white shadow-sm overflow-hidden">
-            <div className="bg-[#F4F9FF] px-6 py-4 border-b border-[#BBDEFB]">
-              <h3 className="font-bold text-[#0D47A1]">Choix du cours</h3>
-            </div>
-            <div className="p-6 space-y-6">
-              
-              <div className="inline-flex h-11 items-center justify-center rounded-xl bg-[#F4F9FF] p-1 text-[#1565C0] w-full md:w-auto border border-[#E3F2FD]">
-                <button type="button" onClick={() => setCourseType('arabe_enfant')} className={`inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-1.5 text-sm font-bold transition-all ${courseType === 'arabe_enfant' ? 'bg-white text-[#0D47A1] shadow-sm border border-[#E3F2FD]' : ''}`}>Arabe enfants</button>
-                <button type="button" onClick={() => setCourseType('arabe_femme')} className={`inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-1.5 text-sm font-bold transition-all ${courseType === 'arabe_femme' ? 'bg-white text-[#0D47A1] shadow-sm border border-[#E3F2FD]' : ''}`}>Arabe femmes</button>
-                <button type="button" onClick={() => setCourseType('soutien')} className={`inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-1.5 text-sm font-bold transition-all ${courseType === 'soutien' ? 'bg-white text-[#0D47A1] shadow-sm border border-[#E3F2FD]' : ''}`}>Soutien scolaire</button>
-              </div>
-
-              <div className="space-y-3 p-5 rounded-xl border border-[#E3F2FD] bg-[#F8FAFC]">
-                <label className="text-sm font-bold text-[#0D47A1]">Horaires souhaités :</label>
-                
-                {courseType === 'arabe_enfant' && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
-                    {['Samedi matin (Maternelle & CP)', 'Samedi après-midi (Niv 1 à 3)', 'Dimanche matin (Maternelle & CP)', 'Dimanche après-midi (Niv 1 à 3)'].map(horaire => (
-                      <label key={horaire} className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg hover:bg-white transition-colors">
-                        <input type="checkbox" checked={formData.schedules.includes(horaire)} onChange={() => handleScheduleToggle(horaire)} className="h-4 w-4 rounded border-[#BBDEFB] text-[#00ACC1] focus:ring-[#00ACC1]" />
-                        <span className="text-sm font-medium text-[#1565C0]">{horaire}</span>
-                      </label>
-                    ))}
+          <Section title="Cours, jours et horaires souhaités" subtitle="Vous pouvez sélectionner plusieurs créneaux.">
+            <div className="grid gap-5 md:grid-cols-2">
+              {Object.entries(groupedCourses).map(([group, courses]) => (
+                <fieldset key={group} className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+                  <legend className="px-2 font-extrabold text-[#073da5]">{group}</legend>
+                  <div className="space-y-3 pt-2">
+                    {courses.map((course) => <label key={course.id} className="flex cursor-pointer gap-3 text-sm leading-5"><input type="checkbox" className="mt-1 h-4 w-4 accent-[#073da5]" checked={form.courseChoices.includes(course.id)} onChange={() => toggleCourse(course.id)} /><span>{course.label}</span></label>)}
                   </div>
-                )}
-                {/* Reprendre le même modèle pour arabe_femme et soutien */}
-                {courseType === 'arabe_femme' && (
-                  <label className="flex items-center space-x-3 mt-2 cursor-pointer p-2 rounded-lg hover:bg-white transition-colors">
-                    <input type="checkbox" checked={formData.schedules.includes('Dimanche après-midi 16h à 20h (Niveau 1)')} onChange={() => handleScheduleToggle('Dimanche après-midi 16h à 20h (Niveau 1)')} className="h-4 w-4 rounded border-[#BBDEFB] text-[#00ACC1] focus:ring-[#00ACC1]" />
-                    <span className="text-sm font-medium text-[#1565C0]">Dimanche après-midi 16h à 20h (Niveau 1)</span>
-                  </label>
-                )}
-                {courseType === 'soutien' && (
-                  <label className="flex items-center space-x-3 mt-2 cursor-pointer p-2 rounded-lg hover:bg-white transition-colors">
-                    <input type="checkbox" checked={formData.schedules.includes('Samedi après-midi 16h à 18h')} onChange={() => handleScheduleToggle('Samedi après-midi 16h à 18h')} className="h-4 w-4 rounded border-[#BBDEFB] text-[#00ACC1] focus:ring-[#00ACC1]" />
-                    <span className="text-sm font-medium text-[#1565C0]">Samedi après-midi 16h à 18h</span>
-                  </label>
-                )}
-              </div>
+                </fieldset>
+              ))}
             </div>
-          </div>
+          </Section>
 
-          {/* SECTION 4 : SIGNATURE */}
-          <div className="form-card rounded-2xl border border-[#BBDEFB] bg-white shadow-sm overflow-hidden">
-            <div className="p-6">
-              <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-[#0D47A1]">Nom & Signature (Parent) *</label>
-                <input required type="text" name="signature" value={formData.signature} onChange={handleChange} className="flex h-10 w-full md:w-1/2 rounded-lg border border-[#E3F2FD] bg-white px-3 py-2 text-sm text-[#0D47A1] focus:ring-2 focus:ring-[#00ACC1] outline-none transition-all" placeholder="Tapez votre nom complet pour signer..." />
-              </div>
+          <Section title="Tarif et paiement">
+            <div className="grid gap-3 text-sm md:grid-cols-2">
+              <Price value="180 € / an" label="Cours de langues" note="+ 20 € de frais de livres" />
+              <Price value="30 € / an" label="Soutien scolaire" note="Paiement par espèces, chèque ou virement" />
             </div>
+          </Section>
 
-            {/* Submit Button */}
-            <div className="bg-slate-50 p-6 border-t border-[#E3F2FD] flex justify-end">
-              <button 
-                type="submit" 
-                disabled={isLoading}
-                className={`inline-flex items-center justify-center rounded-xl bg-[#0D47A1] text-white hover:bg-[#1565C0] h-11 px-8 py-2 text-sm font-bold shadow-md transition-all w-full md:w-auto transform active:scale-95 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
-              >
-                {isLoading ? 'Envoi en cours...' : "Valider l'inscription"}
-              </button>
+          <Section title="Droit à l’image" subtitle="Des photos ou vidéos peuvent être réalisées pendant les activités et sorties.">
+            <div className="grid gap-5 md:grid-cols-2">
+              <Consent label="J’autorise la publication en interne" name="imageRightsInternal" value={form.imageRightsInternal} onChange={setConsent} />
+              <Consent label="J’autorise la publication à l’extérieur" name="imageRightsExternal" value={form.imageRightsExternal} onChange={setConsent} />
             </div>
-          </div>
+          </Section>
+
+          <Section title="Signature">
+            <div className="grid gap-5 md:grid-cols-2">
+              <Field label="Nom et prénom du signataire" name="signerName" value={form.signerName} onChange={change} required />
+              <Field label="Date" name="signatureDate" type="date" value={form.signatureDate} onChange={change} required />
+            </div>
+            <p className="mt-4 text-xs text-slate-500">En envoyant ce formulaire, vous certifiez l’exactitude des informations saisies.</p>
+          </Section>
+
+          <button disabled={loading} className="w-full rounded-2xl bg-[#073da5] px-6 py-4 text-base font-extrabold text-white shadow-lg transition hover:bg-[#052f82] disabled:cursor-wait disabled:opacity-60">{loading ? 'Envoi du dossier…' : 'Envoyer mon dossier'}</button>
+          <p className="text-center text-sm text-slate-500">Renseignements : 06 16 23 90 58 · assofildusavoir@gmail.com</p>
         </form>
-
       </div>
-    </section>
+    </main>
   );
 }
+
+function Section({ title, subtitle, children }) {
+  return <section className="rounded-3xl border border-blue-100 bg-white p-5 shadow-sm md:p-7"><h2 className="text-xl font-black text-[#073da5]">{title}</h2>{subtitle && <p className="mt-1 text-sm text-slate-500">{subtitle}</p>}<div className="mt-5">{children}</div></section>;
+}
+function Field({ label, ...props }) { return <label className="block text-sm font-bold text-slate-700">{label}{props.required && ' *'}<input {...props} className={fieldClass} /></label>; }
+function Choice({ label, options, ...props }) { return <fieldset><legend className="text-sm font-bold text-slate-700">{label}{props.required && ' *'}</legend><div className="mt-2 flex gap-3">{options.map(([value, text]) => <label key={value} className="flex flex-1 cursor-pointer items-center gap-2 rounded-xl border border-blue-100 p-3 text-sm"><input type="radio" {...props} value={value} checked={props.value === value} className="accent-[#073da5]" />{text}</label>)}</div></fieldset>; }
+function ParentFields({ title, prefix, form, onChange }) { return <fieldset className="rounded-2xl border border-blue-100 p-4"><legend className="px-2 font-extrabold text-[#073da5]">{title}</legend><div className="space-y-4"><Field label="Nom et prénom" name={`${prefix}Name`} value={form[`${prefix}Name`]} onChange={onChange} /><Field label="Téléphone" type="tel" name={`${prefix}Phone`} value={form[`${prefix}Phone`]} onChange={onChange} /><Field label="E-mail" type="email" name={`${prefix}Email`} value={form[`${prefix}Email`]} onChange={onChange} /></div></fieldset>; }
+function Consent({ label, name, value, onChange }) { return <fieldset><legend className="text-sm font-bold text-slate-700">{label} *</legend><div className="mt-2 flex gap-3">{[[true, 'Oui'], [false, 'Non']].map(([choice, text]) => <label key={text} className="flex flex-1 cursor-pointer items-center gap-2 rounded-xl border border-blue-100 p-3 text-sm"><input type="radio" name={name} required checked={value === choice} onChange={() => onChange(name, choice)} className="accent-[#073da5]" />{text}</label>)}</div></fieldset>; }
+function Price({ value, label, note }) { return <div className="rounded-2xl bg-blue-50 p-4"><div className="font-black text-[#073da5]">{label} · {value}</div><div className="mt-1 text-slate-600">{note}</div></div>; }

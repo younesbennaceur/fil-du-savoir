@@ -35,7 +35,7 @@ const galleryItems = [
     gridClass: "md:col-span-1 md:row-span-1", // Carte haute (portrait)
   },
    {
-    id: 10,
+    id: 7,
     title: "cadeaux de l'Aïd",
     category: "Solidarité",
     media: "gift.jpeg",

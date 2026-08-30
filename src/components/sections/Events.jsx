@@ -71,7 +71,7 @@ export default function TreasureMapEvents() {
       });
 
       // Effet "Pop" des marqueurs sur la carte
-      gsap.utils.toArray('.map-marker').forEach((marker, i) => {
+      gsap.utils.toArray('.map-marker').forEach((marker) => {
         gsap.from(marker, {
           scale: 0,
           opacity: 0,

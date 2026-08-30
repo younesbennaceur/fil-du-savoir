@@ -1,5 +1,3 @@
-import { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
 import { Routes, Route } from 'react-router-dom'; // On a retiré BrowserRouter d'ici
 
 // Import de vos pages
@@ -9,12 +7,14 @@ import DonationPage from './pages/Don';
 import Navigation from './components/nav/Navigation';
 import Footer from './components/sections/Footer';
 import AdminDashboard from './pages/Admin';
+import EnrollmentPopup from './components/EnrollmentPopup';
 
 
 
 export default function App() {
   return (
     <div className="min-h-screen  ">
+      <EnrollmentPopup />
       
      
       {/* On utilise directement Routes ici ! */}

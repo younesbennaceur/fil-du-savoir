@@ -42,7 +42,7 @@ export default function FilDuSavoirPremiumHero() {
   const popupModalRef = useRef(null);
   
   // ── État pour contrôler l'affichage du Pop-up ──
-  const [showEventPopup, setShowEventPopup] = useState(true);
+  const [showEventPopup, setShowEventPopup] = useState(false);
 
   // ── Cartes d'Activités (Draggables) ──
   const activitiesCards = [
