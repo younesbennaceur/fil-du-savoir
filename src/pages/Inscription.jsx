@@ -2,6 +2,8 @@ import { useState } from 'react';
 import Navigation from '../components/nav/Navigation';
 import { API_URL } from '../config/api';
 
+const PAYMENT_URL = 'https://fil-du-savoir.s2.yapla.com/fr/event-118814';
+
 const COURSES = [
   { group: 'Langue arabe enfants', id: 'arabe_enfant_samedi_matin', label: 'Samedi 9h30 à 12h - niveau 1 et CP' },
   { group: 'Langue arabe enfants', id: 'arabe_enfant_dimanche_matin', label: 'Dimanche 9h30 à 12h - maternelle et CP' },
@@ -28,6 +30,7 @@ export default function InscriptionPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const change = ({ target: { name, value } }) => setForm((current) => ({ ...current, [name]: value }));
   const setConsent = (name, value) => setForm((current) => ({ ...current, [name]: value }));
@@ -41,6 +44,7 @@ export default function InscriptionPage() {
   const submit = async (event) => {
     event.preventDefault();
     setMessage(null);
+    setShowPaymentModal(false);
     if (!form.courseChoices.length) return setMessage({ type: 'error', text: 'Choisissez au moins un cours.' });
     const contactEmail = form.fatherEmail || form.motherEmail;
     if (!contactEmail) return setMessage({ type: 'error', text: 'Renseignez l’e-mail d’au moins un parent.' });
@@ -58,6 +62,7 @@ export default function InscriptionPage() {
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.message || 'Le dossier n’a pas pu être envoyé.');
       setMessage({ type: 'success', text: data.message });
+      setShowPaymentModal(true);
       setForm({ ...EMPTY_FORM, signatureDate: new Date().toISOString().slice(0, 10) });
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
@@ -142,10 +147,36 @@ export default function InscriptionPage() {
             <p className="mt-4 text-xs text-slate-500">En envoyant ce formulaire, vous certifiez l’exactitude des informations saisies.</p>
           </Section>
 
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+            <p className="font-extrabold">Le paiement est obligatoire pour finaliser l’inscription.</p>
+            <p className="mt-1">Après l’envoi du dossier, vous pourrez payer par carte sur Yapla ou choisir un règlement en espèces, par chèque ou par virement auprès de l’association.</p>
+          </div>
           <button disabled={loading} className="w-full rounded-2xl bg-[#073da5] px-6 py-4 text-base font-extrabold text-white shadow-lg transition hover:bg-[#052f82] disabled:cursor-wait disabled:opacity-60">{loading ? 'Envoi du dossier…' : 'Envoyer mon dossier'}</button>
           <p className="text-center text-sm text-slate-500">Renseignements : 06 16 23 90 58 · assofildusavoir@gmail.com</p>
         </form>
       </div>
+
+      {showPaymentModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/65 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="payment-modal-title">
+          <div className="w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl">
+            <div className="bg-gradient-to-br from-[#073da5] to-[#1267d8] px-6 py-7 text-white md:px-8">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-400 text-2xl font-black text-emerald-950">✓</div>
+              <p className="mt-5 text-xs font-bold uppercase tracking-[.2em] text-blue-100">Dossier bien reçu</p>
+              <h2 id="payment-modal-title" className="mt-1 text-2xl font-black">Dernière étape : le paiement</h2>
+            </div>
+            <div className="p-6 md:p-8">
+              <p className="font-semibold text-slate-800">Pour terminer l’inscription et réserver la place, le règlement est obligatoire.</p>
+              <div className="mt-5 rounded-2xl bg-blue-50 p-4 text-sm text-slate-700">
+                <p className="font-extrabold text-[#073da5]">Paiement par carte</p>
+                <p className="mt-1">Utilisez la plateforme sécurisée Yapla avec le bouton ci-dessous.</p>
+              </div>
+              <a href={PAYMENT_URL} target="_blank" rel="noreferrer" className="mt-5 block w-full rounded-2xl bg-[#073da5] px-6 py-4 text-center font-extrabold text-white shadow-lg transition hover:bg-[#052f82]">Payer maintenant sur Yapla →</a>
+              <p className="mt-5 text-center text-sm text-slate-600">Vous préférez payer en espèces, par chèque ou par virement ? Contactez l’association au <strong>06 16 23 90 58</strong>.</p>
+              <button type="button" onClick={() => setShowPaymentModal(false)} className="mt-5 w-full rounded-xl px-4 py-2.5 text-sm font-bold text-slate-500 transition hover:bg-slate-100 hover:text-slate-800">Je paierai par un autre moyen</button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
